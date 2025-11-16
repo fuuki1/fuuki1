@@ -693,15 +693,6 @@ struct OLAIPlanGenerationStepView: View {
         }
     }
     
-    struct AnimatedGradientBackground: View {
-        @State private var animateGradient = false
-        
-        var body: some View {
-            Rectangle()
-                .fill(.background)
-        }
-    }
-    
     // MARK: - Helper Methods
     
     private func getStatusText() -> String {

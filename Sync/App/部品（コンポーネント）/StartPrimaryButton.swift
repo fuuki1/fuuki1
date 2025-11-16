@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct StartPrimaryButton: View {
     var title: String
@@ -11,7 +10,7 @@ struct StartPrimaryButton: View {
 
     var body: some View {
         Button {
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            Haptics.tick()
             action()
         } label: {
             Text(title)
@@ -52,26 +51,6 @@ struct StartPrimaryButton: View {
             startPoint: .topLeading,
             endPoint: .bottomTrailing
         )
-    }
-}
-
-// 小さなヘルパー：押下状態を拾う
-private extension View {
-    func pressEvents(onPress: @escaping () -> Void, onRelease: @escaping () -> Void) -> some View {
-        modifier(PressEventsModifier(onPress: onPress, onRelease: onRelease))
-    }
-}
-
-private struct PressEventsModifier: ViewModifier {
-    let onPress: () -> Void
-    let onRelease: () -> Void
-    func body(content: Content) -> some View {
-        content
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in onPress() }
-                    .onEnded { _ in onRelease() }
-            )
     }
 }
 
