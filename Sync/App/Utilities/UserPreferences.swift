@@ -21,7 +21,7 @@ enum UserPreferences {
         // SwiftDataから最新の体重ログを取得
         if let context = modelContext {
             var descriptor = FetchDescriptor<WeightLogEntity>()
-            descriptor.sortBy = [SortDescriptor(\WeightLogEntity.date, order: .reverse)]
+            descriptor.sortBy = [SortDescriptor(\.recordDate, order: .reverse)]
 
             if let logs = try? context.fetch(descriptor),
                let latest = logs.first {
