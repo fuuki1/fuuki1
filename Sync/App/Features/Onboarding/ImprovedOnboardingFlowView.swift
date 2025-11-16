@@ -333,8 +333,6 @@ public struct ImprovedOnboardingFlowView: View {
                 }
             )
             .transition(slideTransition)
-            .transition(slideTransition)
-            .transition(slideTransition)
 
         case .workoutSchedule:
             WorkoutScheduleView(
