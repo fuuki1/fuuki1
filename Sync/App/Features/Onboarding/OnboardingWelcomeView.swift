@@ -2,18 +2,6 @@
 import SwiftUI
 import UIKit
 
-// MARK: - Haptics Helper
-private enum Haptics {
-    static func tick() {
-        let g = UIImpactFeedbackGenerator(style: .medium)
-        g.impactOccurred()
-    }
-    static func prepare() {
-        UIImpactFeedbackGenerator(style: .medium).prepare()
-    }
-}
-
-
 // MARK: - Onboarding Welcome View
 struct OnboardingWelcomeView: View {
     var onProceed: () -> Void = {}
@@ -74,57 +62,6 @@ struct OnboardingWelcomeView: View {
             .padding(.horizontal, 24)
             .padding(.vertical, 12)
         }
-    }
-}
-
-// MARK: - Custom Button Components
-
-private struct PressableGlassCapsuleStyle: ButtonStyle {
-    var gradient: LinearGradient = LinearGradient(
-        gradient: Gradient(stops: [
-            .init(color: Color(red: 107/255, green: 94/255, blue: 255/255), location: 0.0),
-            .init(color: Color(red: 124/255, green: 77/255, blue: 255/255), location: 0.62),
-            .init(color: Color(red: 140/255, green: 84/255, blue: 255/255), location: 0.94)
-        ]),
-        startPoint: .topLeading,
-        endPoint: .bottomTrailing
-    )
-
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .frame(maxWidth: .infinity, minHeight: 64)
-            .padding(.horizontal, 8)
-            .foregroundStyle(.white)
-            .contentShape(Capsule())
-            .background(
-                Capsule(style: .circular)
-                    .fill(gradient)
-                    // .glassEffect() // Note: .glassEffect() is not a standard SwiftUI modifier.
-                                     // This might be a custom extension you have.
-            )
-            .shadow(color: Color.black.opacity(configuration.isPressed ? 0.18 : 0.28),
-                    radius: configuration.isPressed ? 8 : 18,
-                    x: 0, y: configuration.isPressed ? 4 : 10)
-            .scaleEffect(configuration.isPressed ? 0.985 : 1.0)
-            .animation(.spring(response: 0.25, dampingFraction: 0.9, blendDuration: 0.15),
-                       value: configuration.isPressed)
-    }
-}
-
-private struct LargeGradientButton: View {
-    var title: String
-    var action: () -> Void
-
-    var body: some View {
-        Button(action: {
-            Haptics.tick()
-            action()
-        }) {
-            Text(title)
-                .font(.title3.weight(.semibold))
-        }
-        .buttonStyle(PressableGlassCapsuleStyle())
-        .padding(.bottom, 12)
     }
 }
 
