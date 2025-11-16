@@ -1,63 +1,6 @@
 import SwiftUI
 import UIKit
 
-// MARK: - Glass Effect Modifier
-extension View {
-    func liquidGlassEffect(in shape: some InsettableShape, isSelected: Bool = false) -> some View {
-        self
-            .background {
-                if isSelected {
-                    shape
-                        .fill(
-                            LinearGradient(
-                                gradient: Gradient(stops: [
-                                    .init(color: Color(red: 107.0/255.0, green: 94.0/255.0,  blue: 255.0/255.0), location: 0.0),
-                                    .init(color: Color(red: 124.0/255.0, green: 77.0/255.0,  blue: 255.0/255.0), location: 0.62),
-                                    .init(color: Color(red: 140.0/255.0, green: 84.0/255.0,  blue: 255.0/255.0), location: 0.94)
-                                ]),
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                } else {
-                    shape
-                        .fill(Color(UIColor.systemGray6))
-                }
-            }
-            .shadow(color: isSelected ? Color(red: 124.0/255.0, green: 77.0/255.0, blue: 255.0/255.0).opacity(0.5) : Color.black.opacity(0.08), radius: isSelected ? 12 : 20, x: 0, y: isSelected ? 4 : 8)
-            .shadow(color: isSelected ? Color(red: 124.0/255.0, green: 77.0/255.0, blue: 255.0/255.0).opacity(0.3) : Color.black.opacity(0.04), radius: isSelected ? 6 : 4, x: 0, y: 2)
-    }
-    
-    func glassEffect() -> some View {
-        self
-            .shadow(color: Color.black.opacity(0.15), radius: 20, x: 0, y: 8)
-            .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-    }
-}
-
-// MARK: - Color extension for brand color
-extension Color {
-    init(hex: String) {
-        let cleaned = hex
-            .trimmingCharacters(in: CharacterSet.whitespacesAndNewlines)
-            .trimmingCharacters(in: CharacterSet(charactersIn: "#"))
-        var int: UInt64 = 0
-        Scanner(string: cleaned).scanHexInt64(&int)
-        let a, r, g, b: UInt64
-        switch cleaned.count {
-        case 3: (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
-        default: (a, r, g, b) = (255, 0, 0, 0)
-        }
-        self.init(.sRGB,
-                  red: Double(r) / 255.0,
-                  green: Double(g) / 255.0,
-                  blue: Double(b) / 255.0,
-                  opacity: Double(a) / 255.0)
-    }
-}
-
 // MARK: - Weekday
 public enum Weekday: String, CaseIterable, Hashable, Identifiable {
     case sunday = "日", monday = "月", tuesday = "火", wednesday = "水", thursday = "木", friday = "金", saturday = "土"
@@ -373,27 +316,6 @@ private struct DayChipGlass: View {
         .pressEvents(onPress: { isPressed = true }, onRelease: { isPressed = false })
         .animation(.snappy, value: isSelected)
         .sensoryFeedback(.selection, trigger: trigger)
-    }
-}
-
-// MARK: - Press Events Helper
-private extension View {
-    func pressEvents(onPress: @escaping () -> Void, onRelease: @escaping () -> Void) -> some View {
-        modifier(PressEventsModifier(onPress: onPress, onRelease: onRelease))
-    }
-}
-
-private struct PressEventsModifier: ViewModifier {
-    let onPress: () -> Void
-    let onRelease: () -> Void
-    
-    func body(content: Content) -> some View {
-        content
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in onPress() }
-                    .onEnded { _ in onRelease() }
-            )
     }
 }
 
