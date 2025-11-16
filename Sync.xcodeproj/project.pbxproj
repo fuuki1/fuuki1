@@ -3,8 +3,13 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 77;
+	objectVersion = 90;
 	objects = {
+
+/* Begin PBXBuildFile section */
+		B53731BC2EB43DFF00056D83 /* GoogleGenerativeAI in Frameworks */ = {isa = PBXBuildFile; productRef = B53731BB2EB43DFF00056D83 /* GoogleGenerativeAI */; };
+		B5F649352EBDD2690036FA67 /* ConfettiSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = B5F649342EBDD2690036FA67 /* ConfettiSwiftUI */; };
+/* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
 		B5F992722E98D2600033BC63 /* PBXContainerItemProxy */ = {
@@ -63,24 +68,20 @@
 /* Begin PBXFrameworksBuildPhase section */
 		B5F9925D2E98D25E0033BC63 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
+				B5F649352EBDD2690036FA67 /* ConfettiSwiftUI in Frameworks */,
+				B53731BC2EB43DFF00056D83 /* GoogleGenerativeAI in Frameworks */,
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F9926E2E98D2600033BC63 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F992782E98D2600033BC63 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
@@ -94,6 +95,7 @@
 				B5F992612E98D25E0033BC63 /* Products */,
 			);
 			sourceTree = "<group>";
+			usesTabs = 0;
 		};
 		B5F992612E98D25E0033BC63 /* Products */ = {
 			isa = PBXGroup;
@@ -118,13 +120,13 @@
 			);
 			buildRules = (
 			);
-			dependencies = (
-			);
 			fileSystemSynchronizedGroups = (
 				B5F992622E98D25E0033BC63 /* Sync */,
 			);
 			name = Sync;
 			packageProductDependencies = (
+				B53731BB2EB43DFF00056D83 /* GoogleGenerativeAI */,
+				B5F649342EBDD2690036FA67 /* ConfettiSwiftUI */,
 			);
 			productName = Sync;
 			productReference = B5F992602E98D25E0033BC63 /* Sync.app */;
@@ -147,8 +149,6 @@
 				B5F992742E98D2600033BC63 /* SyncTests */,
 			);
 			name = SyncTests;
-			packageProductDependencies = (
-			);
 			productName = SyncTests;
 			productReference = B5F992712E98D2600033BC63 /* SyncTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -170,8 +170,6 @@
 				B5F9927E2E98D2600033BC63 /* SyncUITests */,
 			);
 			name = SyncUITests;
-			packageProductDependencies = (
-			);
 			productName = SyncUITests;
 			productReference = B5F9927B2E98D2600033BC63 /* SyncUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -184,7 +182,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					B5F9925F2E98D25E0033BC63 = {
 						CreatedOnToolsVersion = 26.0.1;
@@ -208,7 +206,11 @@
 			);
 			mainGroup = B5F992572E98D25E0033BC63;
 			minimizedProjectReferenceProxies = 1;
-			preferredProjectObjectVersion = 77;
+			packageReferences = (
+				B53731BA2EB43DFF00056D83 /* XCRemoteSwiftPackageReference "generative-ai-swift" */,
+				B5F649332EBDCE410036FA67 /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */,
+			);
+			preferredProjectObjectVersion = 90;
 			productRefGroup = B5F992612E98D25E0033BC63 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -223,48 +225,36 @@
 /* Begin PBXResourcesBuildPhase section */
 		B5F9925E2E98D25E0033BC63 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F9926F2E98D2600033BC63 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F992792E98D2600033BC63 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B5F9925C2E98D25E0033BC63 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F9926D2E98D2600033BC63 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 		B5F992772E98D2600033BC63 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
 			files = (
 			);
-			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
@@ -282,30 +272,36 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		B5F992852E98D2600033BC63 /* Debug */ = {
+		B5F992852E98D2600033BC63 /* Debug configuration for PBXNativeTarget "Sync" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Sync/Sync.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3P8JN2HNB9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Sync/Info.plist;
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "医療機関から提供される診療情報（検査結果・投薬・アレルギー等）を読み取り、あなたに合った運動・栄養アドバイスに反映します。情報は端末内で安全に処理され、同意なく外部共有しません。";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "診療記録（医療機関からの検査結果等）を読み取り、ヘルスプロファイルの把握に役立てるために使用します。共有はいつでも「設定＞ヘルスケア」で変更できます。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "ワークアウトや体重等をHealthKitに保存し、進捗を可視化します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Sync;
+				PRODUCT_BUNDLE_IDENTIFIER = com.takahashifuuki.Sync;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -316,30 +312,36 @@
 			};
 			name = Debug;
 		};
-		B5F992862E98D2600033BC63 /* Release */ = {
+		B5F992862E98D2600033BC63 /* Release configuration for PBXNativeTarget "Sync" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Sync/Sync.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3P8JN2HNB9;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Sync/Info.plist;
+				INFOPLIST_KEY_NSHealthClinicalHealthRecordsShareUsageDescription = "医療機関から提供される診療情報（検査結果・投薬・アレルギー等）を読み取り、あなたに合った運動・栄養アドバイスに反映します。情報は端末内で安全に処理され、同意なく外部共有しません。";
+				INFOPLIST_KEY_NSHealthShareUsageDescription = "診療記録（医療機関からの検査結果等）を読み取り、ヘルスプロファイルの把握に役立てるために使用します。共有はいつでも「設定＞ヘルスケア」で変更できます。";
+				INFOPLIST_KEY_NSHealthUpdateUsageDescription = "ワークアウトや体重等をHealthKitに保存し、進捗を可視化します";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.Sync;
+				PRODUCT_BUNDLE_IDENTIFIER = com.takahashifuuki.Sync;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -350,7 +352,7 @@
 			};
 			name = Release;
 		};
-		B5F992872E98D2600033BC63 /* Debug */ = {
+		B5F992872E98D2600033BC63 /* Debug configuration for PBXProject "Sync" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -409,12 +411,13 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
 		};
-		B5F992882E98D2600033BC63 /* Release */ = {
+		B5F992882E98D2600033BC63 /* Release configuration for PBXProject "Sync" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -466,15 +469,17 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		B5F9928A2E98D2600033BC63 /* Debug */ = {
+		B5F9928A2E98D2600033BC63 /* Debug configuration for PBXNativeTarget "SyncTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 3P8JN2HNB9;
@@ -493,7 +498,7 @@
 			};
 			name = Debug;
 		};
-		B5F9928B2E98D2600033BC63 /* Release */ = {
+		B5F9928B2E98D2600033BC63 /* Release configuration for PBXNativeTarget "SyncTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -515,7 +520,7 @@
 			};
 			name = Release;
 		};
-		B5F9928D2E98D2600033BC63 /* Debug */ = {
+		B5F9928D2E98D2600033BC63 /* Debug configuration for PBXNativeTarget "SyncUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -535,7 +540,7 @@
 			};
 			name = Debug;
 		};
-		B5F9928E2E98D2600033BC63 /* Release */ = {
+		B5F9928E2E98D2600033BC63 /* Release configuration for PBXNativeTarget "SyncUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -561,40 +566,68 @@
 		B5F9925B2E98D25E0033BC63 /* Build configuration list for PBXProject "Sync" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B5F992872E98D2600033BC63 /* Debug */,
-				B5F992882E98D2600033BC63 /* Release */,
+				B5F992872E98D2600033BC63 /* Debug configuration for PBXProject "Sync" */,
+				B5F992882E98D2600033BC63 /* Release configuration for PBXProject "Sync" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		B5F992842E98D2600033BC63 /* Build configuration list for PBXNativeTarget "Sync" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B5F992852E98D2600033BC63 /* Debug */,
-				B5F992862E98D2600033BC63 /* Release */,
+				B5F992852E98D2600033BC63 /* Debug configuration for PBXNativeTarget "Sync" */,
+				B5F992862E98D2600033BC63 /* Release configuration for PBXNativeTarget "Sync" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		B5F992892E98D2600033BC63 /* Build configuration list for PBXNativeTarget "SyncTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B5F9928A2E98D2600033BC63 /* Debug */,
-				B5F9928B2E98D2600033BC63 /* Release */,
+				B5F9928A2E98D2600033BC63 /* Debug configuration for PBXNativeTarget "SyncTests" */,
+				B5F9928B2E98D2600033BC63 /* Release configuration for PBXNativeTarget "SyncTests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 		B5F9928C2E98D2600033BC63 /* Build configuration list for PBXNativeTarget "SyncUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				B5F9928D2E98D2600033BC63 /* Debug */,
-				B5F9928E2E98D2600033BC63 /* Release */,
+				B5F9928D2E98D2600033BC63 /* Debug configuration for PBXNativeTarget "SyncUITests" */,
+				B5F9928E2E98D2600033BC63 /* Release configuration for PBXNativeTarget "SyncUITests" */,
 			);
-			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B53731BA2EB43DFF00056D83 /* XCRemoteSwiftPackageReference "generative-ai-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/generative-ai-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.6;
+			};
+		};
+		B5F649332EBDCE410036FA67 /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/simibac/ConfettiSwiftUI.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B53731BB2EB43DFF00056D83 /* GoogleGenerativeAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B53731BA2EB43DFF00056D83 /* XCRemoteSwiftPackageReference "generative-ai-swift" */;
+			productName = GoogleGenerativeAI;
+		};
+		B5F649342EBDD2690036FA67 /* ConfettiSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B5F649332EBDCE410036FA67 /* XCRemoteSwiftPackageReference "ConfettiSwiftUI" */;
+			productName = ConfettiSwiftUI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B5F992582E98D25E0033BC63 /* Project object */;
 }

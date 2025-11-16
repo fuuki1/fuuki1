@@ -2,9 +2,18 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>GeminiAPIKey</key>
+	<string>あなたのAPIキー</string>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array/>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>のデータを読み取り、毎日の記録や達成率を表示するために使います。</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>アプリで記録したデータをヘルスケアにも保存し、他のアプリと共有できるようにするために使います。</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>remote-notification</string>
+		<string>processing</string>
+		<string>Privacy - Health Share Usage Description</string>
 	</array>
 </dict>
 </plist>

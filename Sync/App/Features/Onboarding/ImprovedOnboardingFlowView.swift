@@ -1,0 +1,846 @@
+import SwiftUI
+import UIKit
+
+// MARK: - 改善版オンボーディングフロー(router切替・FlowGate統合・アニメーション強化)
+
+public struct ImprovedOnboardingFlowView: View {
+    public enum Step: CaseIterable, Hashable {
+        // パート1:基本情報
+        case part1Intro
+        case name
+        case gender
+        case age
+
+        // パート2:現在の身体データ
+        case part2Intro
+        case height
+        case weight
+        case bodyType
+        case activityLevel
+
+        // パート3:目標設定
+        case part3Intro
+        case goalType
+        case goalWeight
+        case goalPlan
+        case availableEquipment
+        case workoutSchedule
+        case goalPlanResult
+        case aiPlanGeneration
+        case done
+    }
+
+    private let profileRepo: DefaultSyncingProfileRepository = .makePreview()
+    
+    @State private var name: String = ""
+    @State private var age: Int? = nil
+    @State private var heightCm: Double? = nil
+    @State private var weightKg: Double? = nil
+    @State private var goalWeightKg: Double? = nil
+    @State private var step: Step = .part1Intro
+    @State private var hasPrefilled = false
+    @State private var gate = FlowGate()
+    
+    // WorkoutScheduleViewから選択された曜日を保存
+    @State private var selectedWorkoutWeekdays: [Int] = []
+    
+    // 連打防止用のロックフラグ
+    @State private var isNextLocked: Bool = false
+
+    private var progress: Double {
+        switch step {
+        case .part1Intro: return 0.0 / 3.0
+        case .name:       return 1.0 / 3.0
+        case .gender:     return 2.0 / 3.0
+        case .age:        return 3.0 / 3.0
+        case .part2Intro:     return 0.0 / 4.0
+        case .height:         return 1.0 / 4.0
+        case .weight:         return 2.0 / 4.0
+        case .bodyType:       return 3.0 / 4.0
+        case .activityLevel:  return 4.0 / 4.0
+        // Part 3: updated order
+        case .part3Intro:      return 0.0 / 8.0
+        case .goalType:        return 1.0 / 8.0
+        case .goalWeight:      return 2.0 / 8.0
+        case .goalPlan:        return 3.0 / 8.0
+        case .availableEquipment: return 4.0 / 8.0
+        case .workoutSchedule: return 5.0 / 8.0
+        case .goalPlanResult:  return 6.0 / 8.0
+        case .aiPlanGeneration: return 7.0 / 8.0
+        case .done:            return 8.0 / 8.0
+        }
+    }
+
+
+    private var currentPart: Int {
+        switch step {
+        case .part1Intro, .name, .gender, .age:
+            return 1
+
+        case .part2Intro, .height, .weight, .bodyType, .activityLevel:
+            return 2
+
+        case .part3Intro,
+             .goalType,
+             .goalWeight,
+             .goalPlan,
+             .availableEquipment,
+             .workoutSchedule,
+             .goalPlanResult,
+             .aiPlanGeneration,
+             .done:
+            return 3
+        }
+    }
+
+    private var userForPlan: UserProfile {
+        UserProfile(
+            name: name.isEmpty ? nil : name,
+            age: age,
+            gender: nil,
+            bodyType: nil,
+            heightCm: heightCm,
+            weightKg: weightKg,
+            activityLevel: nil,
+            goal: GoalProfile(type: nil, goalWeightKg: goalWeightKg)
+        )
+    }
+    
+    private var isFirstStep: Bool { Step.allCases.first == step }
+
+    private func nextStep(from current: Step) -> Step? {
+        guard let idx = Step.allCases.firstIndex(of: current),
+              idx < Step.allCases.count - 1 else { return nil }
+        return Step.allCases[idx + 1]
+    }
+
+    // ImprovedOnboardingFlowView の continueFlow() に連打防止ロジックを追加
+    /// Advances to the next step in the onboarding flow. Runs on the main actor
+    /// to ensure state mutations occur on the correct thread and guards against
+    /// rapid repeated taps.
+    @MainActor
+    private func continueFlow() {
+        // 連打防止：すでに遷移中、またはロック中なら無視
+        guard !isNextLocked, !gate.isNavigating else {
+            print("[OnboardingFlow] continueFlow ignored (locked or navigating)")
+            return
+        }
+        isNextLocked = true
+        
+        print("[OnboardingFlow] continueFlow called, current step: \(step)")
+        gate.navigate {
+            if let next = nextStep(from: step) {
+                print("[OnboardingFlow] Moving to next step: \(next)")
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    step = next
+                }
+            } else {
+                print("[OnboardingFlow] No next step found!")
+            }
+        }
+        
+        // 一定時間後にロック解除（アニメーション完了を待つため少し余裕を持たせる）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            isNextLocked = false
+        }
+    }
+    public init() {}
+
+    public var body: some View {
+        ZStack {
+            currentStepView
+        }
+        .animation(.easeInOut(duration: 0.3), value: step)
+        .safeAreaInset(edge: .top) { header }
+        // Perform a one‑time prefill of existing profile data when the view
+        // appears. Explicitly run this task on the main actor so that updates
+        // to `@State` properties occur on the UI thread. Without the
+        // `@MainActor` annotation Swift 6.2 may emit warnings about capturing
+        // non‑Sendable state in a concurrent context.
+        .task(id: hasPrefilled) { @MainActor in
+            guard !hasPrefilled else { return }
+            await prefillIfNeeded()
+            hasPrefilled = true
+        }
+        .onAppear {
+            print("🎯 [OnboardingFlow] Body appeared, step: \(step)")
+        }
+    }
+
+    @ViewBuilder
+    private var currentStepView: some View {
+        switch step {
+        // パート1
+        case .part1Intro:
+            PartIntroView(
+                partNumber: 1,
+                title: "あなたの基本情報",
+                subtitle: "まずは、あなたの基本情報を入力しましょう。",
+                onContinue: continueFlow
+            )
+            .transition(scaleTransition)
+
+        case .name:
+            OLNameStepView(
+                name: $name,
+                gate: gate,
+                onContinue: continueFlow,
+                profileRepo: profileRepo
+            )
+            .transition(slideTransition)
+
+        case .gender:
+            OLGenderStepView(
+                gate: gate,
+                profileRepo: profileRepo,
+                onContinue: { _ in continueFlow() }
+            )
+            .transition(slideTransition)
+
+        case .age:
+            OLAgeStepView(
+                age: $age,
+                gate: gate,
+                onContinue: continueFlow,
+                profileRepo: profileRepo
+            )
+            .transition(slideTransition)
+
+        // パート2
+        case .part2Intro:
+            PartIntroView(
+                partNumber: 2,
+                title: "自分の体を知ろう",
+                subtitle: "あなたの身体情報を入力して、現在の状態を把握しましょう。",
+                onContinue: continueFlow
+            )
+            .transition(scaleTransition)
+
+        case .height:
+            OLHeightStepView(
+                heightCm: $heightCm,
+                gate: gate,
+                onContinue: continueFlow,
+                profileRepo: profileRepo
+            )
+            .transition(slideTransition)
+
+        case .weight:
+            OLWeightStepView(
+                weightKg: $weightKg,
+                gate: gate,
+                onContinue: continueFlow,
+                profileRepo: profileRepo
+            )
+            .transition(slideTransition)
+
+        case .bodyType:
+            OLBodyTypeStepView(
+                gate: gate,
+                profileRepo: profileRepo,
+                onContinue: { _ in continueFlow() }
+            )
+            .transition(slideTransition)
+
+        case .activityLevel:
+            OLActivityLevelStepView(
+                gate: gate,
+                profileRepo: profileRepo,
+                onContinue: { _ in continueFlow() }
+            )
+            .transition(slideTransition)
+
+        // パート3
+        case .part3Intro:
+            PartIntroView(
+                partNumber: 3,
+                title: "目標とプラン設定",
+                subtitle: "あなたの目標を設定し、最適なプランを選択しましょう",
+                onContinue: continueFlow
+            )
+            .transition(scaleTransition)
+
+        case .goalType:
+            OLGoalTypeStepView(
+                gate: gate,
+                onContinue: continueFlow,
+                profileRepo: profileRepo
+            )
+            .transition(slideTransition)
+
+        case .goalWeight:
+            OLGoalWeightStepView(
+                goalWeightKg: $goalWeightKg,
+                       currentWeightKg: weightKg,
+                       currentHeightCm: heightCm,
+                       gate: gate,
+                       profileRepo: profileRepo,
+                       onContinue: continueFlow
+            )
+            .transition(slideTransition)
+            
+        case .goalPlan:
+            GoalPlanStepView(
+                repository: profileRepo,
+                user: userForPlan,
+                targetWeight: goalWeightKg ?? weightKg ?? 0,
+                onContinue: continueFlow
+            )
+            .transition(slideTransition)
+
+        case .availableEquipment:
+            AvailableEquipmentView(
+                onSave: { _ in },
+                onSaveSplit: { cats, dets in
+                    print("🟢 [OnboardingFlow] onSaveSplit called")
+                    print("   📍 Current step BEFORE: \(step)")
+                    print("   📍 Next step calculation...")
+                    
+                    // 次のステップを計算
+                    guard let next = nextStep(from: step) else {
+                        print("   ❌ No next step found!")
+                        return
+                    }
+                    
+                    print("   📍 Next step: \(next)")
+                    print("   🔄 Updating step with animation...")
+                    
+                    // ✅ 画面遷移（同期的）
+                    withAnimation(.easeInOut(duration: 0.3)) {
+                        step = next
+                    }
+                    
+                    print("   📍 Current step AFTER: \(step)")
+                    
+                    // ✅ 保存処理（非同期・分離）
+                    // In Swift 6.2, passing a non‑Sendable repository into a
+                    // background queue can result in concurrency warnings. To
+                    // avoid capturing `profileRepo` across actor boundaries,
+                    // perform the save operations within a `Task` scoped to the
+                    // main actor. This ensures that the updates occur on the
+                    // correct isolation context while still running
+                    // asynchronously.
+                    Task { @MainActor in
+                        do {
+                            try await profileRepo.updatePreferredActivities(Array(cats))
+                            try await profileRepo.updateOwnedEquipments(Array(dets))
+                            await profileRepo.syncWithRemote()
+                            print("✅ [AvailableEquipment] Saved successfully")
+                        } catch {
+                            print("❌ [AvailableEquipment] Save failed: \(error)")
+                        }
+                    }
+                }
+            )
+            .transition(slideTransition)
+            .transition(slideTransition)
+            .transition(slideTransition)
+
+        case .workoutSchedule:
+            WorkoutScheduleView(
+                selectedWorkoutWeekdays: selectedWorkoutWeekdays
+            ) { weekdays in
+                // 選択された曜日を保存
+                selectedWorkoutWeekdays = weekdays
+                continueFlow()
+            }
+            .transition(slideTransition)
+
+        case .goalPlanResult:
+            UIGoalPlanResultView(
+                profileRepo: profileRepo,
+                onContinue: continueFlow,
+                prefill: GoalPlanResultPrefill(
+                    currentWeight: weightKg,
+                    goalWeight: goalWeightKg,
+                    weeklyRateKg: nil,
+                    weeksNeeded: nil,
+                    targetDate: nil
+                )
+            )
+            .transition(slideTransition)
+
+        case .aiPlanGeneration:
+            OLAIPlanGenerationStepView(
+                profileRepo: profileRepo,
+                selectedWorkoutWeekdays: selectedWorkoutWeekdays.isEmpty ? [2, 4, 6] : selectedWorkoutWeekdays,
+                onContinue: { _ in
+                    continueFlow()
+                }
+            )
+            .transition(slideTransition)
+
+        case .done:
+            completionView
+                .transition(.opacity)
+        }
+    }
+
+    private var slideTransition: AnyTransition {
+        .asymmetric(
+            insertion: .move(edge: .trailing).combined(with: .opacity),
+            removal: .move(edge: .leading).combined(with: .opacity)
+        )
+    }
+
+    private var scaleTransition: AnyTransition {
+        .asymmetric(
+            insertion: .scale(scale: 0.9).combined(with: .opacity),
+            removal: .scale(scale: 1.1).combined(with: .opacity)
+        )
+    }
+
+    /// Navigates back to the previous onboarding step. Runs on the main
+    /// actor to ensure UI state updates occur on the correct thread.
+    @MainActor
+    private func back() {
+        gate.navigate {
+            let order = Step.allCases
+            guard let currentIndex = order.firstIndex(of: step), currentIndex > 0 else { return }
+            
+            var targetIndex = currentIndex - 1
+            var targetStep = order[targetIndex]
+            
+            // イントロ画面をスキップして、前のパートの最後のデータ入力画面に戻る
+            while targetIndex > 0 && (targetStep == .part1Intro || targetStep == .part2Intro || targetStep == .part3Intro) {
+                targetIndex -= 1
+                targetStep = order[targetIndex]
+            }
+            
+            withAnimation(.easeInOut(duration: 0.3)) {
+                step = order[targetIndex]
+            }
+        }
+    }
+
+    /// Prefills the onboarding fields with existing profile values. This
+    /// asynchronous method is isolated to the main actor so that it can
+    /// safely update `@State` properties without crossing actor boundaries.
+    @MainActor
+    private func prefillIfNeeded() async {
+        do {
+            let p = try await profileRepo.getProfile()
+            if name.isEmpty, let pName = p.name { name = pName }
+            if age == nil { age = p.age }
+            if heightCm == nil { heightCm = p.heightCm }
+            if weightKg == nil { weightKg = p.weightKg }
+            if goalWeightKg == nil { goalWeightKg = p.goal?.goalWeightKg }
+            // Load selected weekdays from existing workout schedule if none selected yet.
+            if selectedWorkoutWeekdays.isEmpty, let schedule = p.workoutSchedule {
+                selectedWorkoutWeekdays = schedule.selectedWeekdays
+            }
+        } catch {
+            #if DEBUG
+            print("[OnboardingFlow] prefill failed: \(error)")
+            #endif
+        }
+    }
+
+    private var shouldShowHeader: Bool {
+        switch step {
+        case .part1Intro, .part2Intro, .part3Intro, .done:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private var header: some View {
+        HStack(spacing: 12) {
+            Button(action: back) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundStyle(Palette.accent)
+            }
+            .tint(Palette.accent)
+            .opacity(isFirstStep ? 0 : 1)
+            .disabled(isFirstStep || gate.isNavigating)
+            .accessibilityHidden(isFirstStep)
+
+            HStack(spacing: 2) {
+                ForEach(1...3, id: \.self) { partNumber in
+                    PartProgressBar(
+                        progress: partNumber == currentPart ? progress : (partNumber < currentPart ? 1.0 : 0.0),
+                        isActive: partNumber == currentPart,
+                        isCompleted: partNumber < currentPart
+                    )
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color(.systemBackground))
+        .opacity(shouldShowHeader ? 1 : 0)
+    }
+
+    private var completionView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "checkmark.circle.fill")
+                .font(.system(size: 64))
+                .foregroundStyle(Palette.accent)
+                .symbolEffect(.bounce, value: step == .done)
+
+            Text("プロフィール設定が完了しました")
+                .font(.title3.weight(.semibold))
+
+            Text("すべての項目はいつでも設定から編集できます")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color(.systemBackground))
+    }
+}
+
+// MARK: - アニメーション付きグラデーション背景
+
+private struct AnimatedGradientBackground: View {
+    @State private var animationPhase: Double = 0
+    
+    var body: some View {
+        TimelineView(.animation) { timeline in
+            let time = timeline.date.timeIntervalSinceReferenceDate
+            
+            ZStack {
+                MeshGradientLayer(
+                    colors: [
+                        Color(red: 200/255, green: 180/255, blue: 255/255),
+                        Color(red: 124/255, green: 77/255, blue: 255/255),
+                        Color(red: 60/255, green: 70/255, blue: 220/255),
+                    ],
+                    time: time,
+                    speed: 0.3,
+                    offset: 0
+                )
+                
+                MeshGradientLayer(
+                    colors: [
+                        Color(red: 170/255, green: 150/255, blue: 240/255),
+                        Color(red: 107/255, green: 94/255, blue: 255/255),
+                        Color(red: 50/255, green: 80/255, blue: 200/255),
+                    ],
+                    time: time,
+                    speed: 0.4,
+                    offset: 120
+                )
+                .opacity(0.7)
+                
+                MeshGradientLayer(
+                    colors: [
+                        Color(red: 220/255, green: 200/255, blue: 255/255),
+                        Color(red: 180/255, green: 140/255, blue: 250/255),
+                        Color(red: 140/255, green: 84/255, blue: 255/255),
+                    ],
+                    time: time,
+                    speed: 0.5,
+                    offset: 240
+                )
+                .opacity(0.5)
+                .blendMode(.screen)
+            }
+        }
+        .ignoresSafeArea()
+    }
+}
+
+private struct MeshGradientLayer: View {
+    let colors: [Color]
+    let time: Double
+    let speed: Double
+    let offset: Double
+    
+    var body: some View {
+        let phase = time * speed + offset
+        
+        let startX = 0.5 + 0.3 * cos(phase)
+        let startY = 0.5 + 0.3 * sin(phase)
+        let endX = 0.5 + 0.3 * cos(phase + .pi)
+        let endY = 0.5 + 0.3 * sin(phase + .pi)
+        
+        LinearGradient(
+            gradient: Gradient(colors: colors),
+            startPoint: UnitPoint(x: startX, y: startY),
+            endPoint: UnitPoint(x: endX, y: endY)
+        )
+    }
+}
+
+// MARK: - 点々が集まる矢印アニメーション
+
+private struct AnimatedDotsArrowView: View {
+    @State private var opacity: Double = 0
+    
+    private let dotPositions: [(x: CGFloat, y: CGFloat)] = [
+        (0.3, 0.2), (0.4, 0.3), (0.5, 0.4), (0.6, 0.5),
+        (0.5, 0.6), (0.4, 0.7), (0.3, 0.8)
+    ]
+    
+    private let dotColor = Color.white
+    private let dotSize: CGFloat = 5
+    
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack {
+                ForEach(0..<dotPositions.count, id: \.self) { index in
+                    let pos = dotPositions[index]
+                    
+                    Circle()
+                        .fill(dotColor)
+                        .frame(width: dotSize, height: dotSize)
+                        .position(
+                            x: geometry.size.width * pos.x,
+                            y: geometry.size.height * pos.y
+                        )
+                }
+            }
+        }
+        .opacity(opacity)
+        .onAppear {
+            withAnimation(.easeIn(duration: 0.3)) {
+                opacity = 1
+            }
+        }
+    }
+}
+
+// MARK: - シェブロン矢印ビュー
+private struct ChevronArrowShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        let inset = min(rect.width, rect.height) * 0.06
+        let minX = rect.minX + inset
+        let maxX = rect.maxX - inset
+        let minY = rect.minY + inset
+        let maxY = rect.maxY - inset
+        let midY = rect.midY
+
+        path.move(to: CGPoint(x: minX, y: minY))
+        path.addLine(to: CGPoint(x: maxX, y: midY))
+        path.addLine(to: CGPoint(x: minX, y: maxY))
+        return path
+    }
+}
+
+private struct ArrowShapeView: View {
+    enum Direction { case left, right }
+    var direction: Direction = .right
+    var lineWidth: CGFloat = 12.0
+    var color: Color = .white
+
+    var body: some View {
+        ChevronArrowShape()
+            .stroke(
+                color,
+                style: StrokeStyle(
+                    lineWidth: lineWidth,
+                    lineCap: .square,
+                    lineJoin: .miter,
+                    miterLimit: 2
+                )
+            )
+            .scaleEffect(x: direction == .right ? 1 : -1, y: 1)
+    }
+}
+
+private enum ArrowLayout {
+    static var dotSize: CGFloat = 64
+    static var dotSpacing: CGFloat = -50
+    static var groupToPhotoGap: CGFloat = -49
+    static var photoSize: CGFloat = 80
+}
+
+// MARK: - パートイントロ画面
+
+private struct PartIntroView: View {
+    let partNumber: Int
+    let title: String
+    let subtitle: String
+    /// Closure invoked when the user proceeds to the next step. Marked
+    /// `@Sendable` so it can safely be captured in concurrent contexts.
+    let onContinue: @MainActor @Sendable () -> Void
+
+    @State private var showPartNumber = false
+    @State private var showMainTitle = false
+    @State private var showSubtitle = false
+    @State private var showArrows = false
+    @State private var arrowSlideOut = false
+    @State private var autoProgressTask: DispatchWorkItem?
+    
+    @State private var backgroundPulse: CGFloat = 1.0
+    @State private var lightBandOffset: CGFloat = -1.5
+    @State private var containerWidth: CGFloat = 0
+
+    var body: some View {
+        ZStack {
+            EnhancedAnimatedBackground(
+                pulseScale: backgroundPulse,
+                lightBandOffset: lightBandOffset
+            )
+
+            VStack(spacing: 40) {
+                Spacer()
+
+                Text("パート\(partNumber)")
+                    .font(.system(size: 24, weight: .semibold, design: .rounded))
+                    .foregroundColor(.white.opacity(0.9))
+                    .opacity(showPartNumber ? 1 : 0)
+                    .offset(y: showPartNumber ? 0 : -30)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(title)
+                        .font(.system(size: 48, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.75)
+                        .allowsTightening(true)
+                        .truncationMode(.tail)
+                        .scaleEffect(showMainTitle ? 1.0 : 0.9)
+                        .opacity(showMainTitle ? 1 : 0)
+
+                    Text(subtitle)
+                        .font(.system(size: 32, weight: .semibold, design: .rounded))
+                        .foregroundColor(.white)
+                        .opacity(showSubtitle ? 1 : 0)
+                        .offset(y: showSubtitle ? 0 : 20)
+                }
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 40)
+
+                HStack(spacing: ArrowLayout.groupToPhotoGap) {
+                    HStack(spacing: ArrowLayout.dotSpacing) {
+                        ForEach(0..<3, id: \.self) { index in
+                            AnimatedDotsArrowView()
+                                .frame(width: ArrowLayout.dotSize, height: ArrowLayout.dotSize)
+                        }
+                    }
+
+                    Image("矢印")
+                        .renderingMode(.original)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: ArrowLayout.photoSize, height: ArrowLayout.photoSize)
+                        .accessibilityHidden(true)
+                }
+                .opacity(showArrows && !arrowSlideOut ? 1 : 0)
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear
+                            .onAppear { containerWidth = proxy.size.width }
+                            .onChange(of: proxy.size.width) { oldWidth, newWidth in
+                                containerWidth = newWidth
+                            }
+                    }
+                )
+                .offset(x: arrowSlideOut ? containerWidth : (showArrows ? 0 : -400))
+                
+                Spacer()
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { handleContinue() }
+        .onAppear {
+            startAnimationSequence()
+            scheduleArrowSlideOutAndContinue()
+        }
+        .onDisappear {
+            autoProgressTask?.cancel()
+            autoProgressTask = nil
+        }
+    }
+    
+    private func startAnimationSequence() {
+        withAnimation(.easeInOut(duration: 3.0).repeatForever(autoreverses: true)) {
+            backgroundPulse = 1.05
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeOut(duration: 0.5)) {
+                showPartNumber = true
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            withAnimation(.spring(response: 0.6, dampingFraction: 0.7, blendDuration: 0)) {
+                showMainTitle = true
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.7) {
+            withAnimation(.easeOut(duration: 0.5)) {
+                showSubtitle = true
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            withAnimation(.easeOut(duration: 0.8)) {
+                showArrows = true
+            }
+        }
+    }
+    
+    private func scheduleArrowSlideOutAndContinue() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.2) {
+            withAnimation(.easeInOut(duration: 0.3)) {
+                arrowSlideOut = true
+            }
+        }
+        
+        let task = DispatchWorkItem { [onContinue] in onContinue() }
+        autoProgressTask = task
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5, execute: task)
+    }
+    
+    private func handleContinue() {
+        autoProgressTask?.cancel()
+        autoProgressTask = nil
+        onContinue()
+    }
+}
+
+private struct EnhancedAnimatedBackground: View {
+    let pulseScale: CGFloat
+    let lightBandOffset: CGFloat
+    
+    var body: some View {
+        ZStack {
+            AnimatedGradientBackground()
+                .scaleEffect(pulseScale)
+        }
+        .ignoresSafeArea()
+    }
+}
+
+// MARK: - プログレスバー
+
+private struct PartProgressBar: View {
+    var progress: Double
+    var isActive: Bool
+    var isCompleted: Bool
+    
+    private var clamped: CGFloat { CGFloat(min(max(progress, 0), 1)) }
+    
+    var body: some View {
+        GeometryReader { geo in
+            ZStack(alignment: .leading) {
+                Capsule()
+                    .fill(isCompleted ? Palette.accent.opacity(0.3) : Palette.accent.opacity(0.18))
+                
+                Capsule()
+                    .fill(Palette.accent)
+                    .frame(width: geo.size.width * clamped)
+            }
+        }
+        .frame(height: 6)
+        .drawingGroup()
+        .animation(.easeInOut(duration: 0.22), value: progress)
+    }
+}
+
+
+// MARK: - Preview
+
+#Preview("完全フロー") {
+    ImprovedOnboardingFlowView()
+        .environmentObject(DataModel())
+}
