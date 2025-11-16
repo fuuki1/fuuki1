@@ -93,19 +93,19 @@ struct WorkoutTimerView: View {
                     percent: overlayPercent,
                     remainingCount: overlayRemaining,
                     onResume: {
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        Haptics.tick()
                         isRunning = false
                         withAnimation(.easeOut(duration: 0.12)) {
                             showPauseOverlay = false
                         }
                     },
                     onRestart: {
-                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        Haptics.notification(.warning)
                         restartCurrentExercise()
                         showPauseOverlay = false
                     },
                     onQuit: {
-                        UINotificationFeedbackGenerator().notificationOccurred(.error)
+                        Haptics.notification(.error)
                         isRunning = false
                         timer?.invalidate()
                         withAnimation(.easeOut(duration: 0.12)) {
@@ -122,7 +122,7 @@ struct WorkoutTimerView: View {
             if !showPauseOverlay {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        Haptics.lightTick()
                         withAnimation(.easeOut(duration: 0.12)) {
                             isRunning = false
                             showPauseOverlay = true

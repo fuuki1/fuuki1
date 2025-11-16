@@ -3,21 +3,6 @@ import SwiftUI
 import UIKit
 import SwiftData
 
-// MARK: - Haptics Helper
-private enum Haptics {
-    static func tick() {
-        let g = UIImpactFeedbackGenerator(style: .medium)
-        g.impactOccurred()
-    }
-    static func prepare() {
-        UIImpactFeedbackGenerator(style: .medium).prepare()
-    }
-    static func success() {
-        let n = UINotificationFeedbackGenerator()
-        n.notificationOccurred(.success)
-    }
-}
-
 // MARK: - Start View
 struct StartView: View {
     var onStart: @Sendable () -> Void = {}
@@ -119,7 +104,7 @@ struct StartView: View {
             .statusBarHidden(false)
             .navigationDestination(isPresented: $showWelcome) {
                 OnboardingWelcomeView(onProceed: {
-                    Haptics.success()
+                    Haptics.notification(.success)
                     Task { @MainActor in
                         try? await Task.sleep(nanoseconds: 300_000_000)
                         showOnboarding = true
