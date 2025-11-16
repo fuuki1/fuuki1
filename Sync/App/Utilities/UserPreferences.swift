@@ -20,9 +20,9 @@ enum UserPreferences {
     static func currentWeightKg(from modelContext: ModelContext? = nil) -> Double {
         // SwiftDataから最新の体重ログを取得
         if let context = modelContext {
-            let descriptor = FetchDescriptor<WeightLogEntity>(
-                sortBy: [SortDescriptor(\.date, order: .reverse)]
-            )
+            var descriptor = FetchDescriptor<WeightLogEntity>()
+            descriptor.sortBy = [SortDescriptor(\WeightLogEntity.date, order: .reverse)]
+
             if let logs = try? context.fetch(descriptor),
                let latest = logs.first {
                 return latest.weightKg

@@ -57,8 +57,5 @@ extension LinearGradient {
 
 // MARK: - Gradient Convenience
 
-/// グラデーション関連のユーティリティ
-extension Color {
-    /// ブランドグラデーションをLinearGradientとして提供
-    static let brandGradient = LinearGradient.brandPrimary
-}
+// 注: Color.brandGradientはColorExtensions.swiftで既に定義されています
+// ここでは追加のグラデーション定義のみを提供します

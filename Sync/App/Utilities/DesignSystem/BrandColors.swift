@@ -9,11 +9,10 @@ extension Color {
 
     /// メインブランドカラー: #7C4DFF (Purple)
     /// 使用箇所: ボタン、アクセント、選択状態、プログレスインジケーター
+    /// 注: customPurpleと同じ色（互換性のため両方定義）
     static let brandPurple = Color(red: 124.0/255.0, green: 77.0/255.0, blue: 255.0/255.0)
 
-    /// Syncグリーン: #63C465
-    /// 使用箇所: 成功状態、完了表示、アクティビティリング
-    static let syncGreen = Color(red: 99.0/255.0, green: 196.0/255.0, blue: 101.0/255.0)
+    // syncGreenはColorExtensions.swiftで既に定義されています
 
     // MARK: - Background Colors
 
