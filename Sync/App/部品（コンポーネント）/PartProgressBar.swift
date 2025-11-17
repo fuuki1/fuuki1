@@ -14,10 +14,10 @@ struct PartProgressBar: View {
         GeometryReader { geo in
             ZStack(alignment: .leading) {
                 Capsule()
-                    .fill(isCompleted ? Palette.accent.opacity(0.3) : Palette.accent.opacity(0.18))
+                    .fill(isCompleted ? Color.customPurple.opacity(0.3) : Color.customPurple.opacity(0.18))
 
                 Capsule()
-                    .fill(Palette.accent)
+                    .fill(Color.customPurple)
                     .frame(width: geo.size.width * clamped)
             }
         }

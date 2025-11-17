@@ -131,9 +131,7 @@ extension PlanOption {
 
 // MARK: - View Components
 
-private extension Color {
-    static let brandPurple = Color(red: 124/255, green: 77/255, blue: 255/255) // #7C4DFF
-}
+// Note: brandPurple is now defined in BrandColors.swift
 
 private func formatKg(_ x: Double) -> String { String(format: "%.1f", x) }
 

@@ -93,19 +93,19 @@ struct WorkoutTimerView: View {
                     percent: overlayPercent,
                     remainingCount: overlayRemaining,
                     onResume: {
-                        UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                        Haptics.tick()
                         isRunning = false
                         withAnimation(.easeOut(duration: 0.12)) {
                             showPauseOverlay = false
                         }
                     },
                     onRestart: {
-                        UINotificationFeedbackGenerator().notificationOccurred(.warning)
+                        Haptics.notification(.warning)
                         restartCurrentExercise()
                         showPauseOverlay = false
                     },
                     onQuit: {
-                        UINotificationFeedbackGenerator().notificationOccurred(.error)
+                        Haptics.notification(.error)
                         isRunning = false
                         timer?.invalidate()
                         withAnimation(.easeOut(duration: 0.12)) {
@@ -122,7 +122,7 @@ struct WorkoutTimerView: View {
             if !showPauseOverlay {
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        Haptics.lightTick()
                         withAnimation(.easeOut(duration: 0.12)) {
                             isRunning = false
                             showPauseOverlay = true
@@ -1216,149 +1216,6 @@ struct WorkoutTimerView: View {
                 .fixedSize(horizontal: false, vertical: true)
         }
     }
-}
-
-// MARK: - SetLog Data Structure
-
-/// ワークアウト中に記録する各セットの情報を保持する構造体。
-/// exerciseIndex は day.exercises 内のエクササイズのインデックス、
-/// setIndex は 1 から始まるセット番号を表す。
-/// weightKg と reps はそれぞれユーザーが扱った重量(kg)と実施回数。
-struct SetLog: Identifiable, Hashable {
-    let id = UUID()
-    let exerciseIndex: Int
-    let setIndex: Int
-    let weightKg: Double
-    let reps: Int
-}
-
-// MARK: - Tips Flow Layout (wrap items horizontally like tags)
-private struct TipsFlowLayout: Layout {
-    var spacing: CGFloat = 8
-    var lineSpacing: CGFloat = 6
-    var maxItemWidth: CGFloat = 240
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let width = proposal.width ?? .infinity
-        guard width.isFinite else { return .zero }
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var rowH: CGFloat = 0
-        for sub in subviews {
-            let item = sub.sizeThatFits(ProposedViewSize(width: min(width, maxItemWidth), height: nil))
-            if x > 0 && x + item.width > width {
-                x = 0
-                y += rowH + lineSpacing
-                rowH = 0
-            }
-            x += item.width + spacing
-            rowH = max(rowH, item.height)
-        }
-        return CGSize(width: width, height: y + rowH)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX
-        var y = bounds.minY
-        var rowH: CGFloat = 0
-        for sub in subviews {
-            let available = bounds.width
-            let itemSize = sub.sizeThatFits(ProposedViewSize(width: min(available, maxItemWidth), height: nil))
-            if x > bounds.minX && x + itemSize.width > bounds.maxX {
-                x = bounds.minX
-                y += rowH + lineSpacing
-                rowH = 0
-            }
-            sub.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(width: itemSize.width, height: itemSize.height))
-            x += itemSize.width + spacing
-            rowH = max(rowH, itemSize.height)
-        }
-    }
-}
-
-// MARK: - Scale Button Style
-
-struct ScaleButtonStyle: ButtonStyle {
-    func makeBody(configuration: Configuration) -> some View {
-        configuration.label
-            .scaleEffect(configuration.isPressed ? 0.94 : 1.0)
-            .animation(.spring(response: 0.3, dampingFraction: 0.6), value: configuration.isPressed)
-            .onChange(of: configuration.isPressed) { _, newValue in
-                if newValue {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                }
-            }
-    }
-}
-
-// MARK: - Pause Overlay
-
-private struct PauseOverlay: View {
-    let percent: Int
-    let remainingCount: Int
-    let onResume: () -> Void
-    let onRestart: () -> Void
-    let onQuit: () -> Void
-    
-    var body: some View {
-        ZStack {
-            Rectangle()
-                .fill(.ultraThinMaterial)
-                .ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                Text("がんばりましょう!\nあなたならできる!")
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
-                    .multilineTextAlignment(.leading)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("あなたは\(percent)%を終了しました")
-                        .font(.title3)
-                        .foregroundStyle(.secondary)
-                    
-                    Text("残りあと\(remainingCount)個のエクササイズ")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(Color(red: 124.0/255.0, green: 77.0/255.0, blue: 255.0/255.0))
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.bottom, 20)
-                
-                StartPrimaryButton(title: "再開", action: onResume)
-                    .frame(maxWidth: .infinity)
-                
-                Button("エクササイズを最初から始める", action: onRestart)
-                    .buttonStyle(.plain)
-                    .font(.title3.weight(.semibold))
-                    .foregroundStyle(Color(red: 124.0/255.0, green: 77.0/255.0, blue: 255.0/255.0))
-                    .frame(height: 60)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, -2)
-                    .contentShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
-                    .background(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .fill(Color(.systemGray6))
-                    )
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 32, style: .continuous)
-                            .strokeBorder(Color(.quaternaryLabel), lineWidth: 0.7)
-                    )
-                
-                Button("やめる", action: onQuit)
-                    .buttonStyle(.plain)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 2)
-            }
-            .padding(.horizontal, 28)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-        }
-    }
-}
-
-extension Color {
-    static let customPurple = Color(red: 0x7C / 255.0, green: 0x4D / 255.0, blue: 0xFF / 255.0)
-    static let syncGreen = Color(red: 99.0/255.0, green: 196.0/255.0, blue: 101.0/255.0)
 }
 
 // MARK: - Preview

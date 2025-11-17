@@ -18,76 +18,6 @@ struct WorkoutRecordView: View {
 
     // 新しいカテゴリーリスト
     let categories = ["すべて", "履歴", "カスタム", "お気に入り", "胸", "肩", "背中", "腕", "脚", "腹筋", "お尻", "有酸素", "スポーツ"]
-
-    // MARK: - Keywords for body part classification
-    private let sportsKeywords: [String] = [
-        "バスケ", "サッカー", "テニス", "バドミントン", "バレー", "ラグビー", "野球", "ゴルフ", "卓球",
-        "ボウリング", "スケート", "スキー", "スノーボード", "サーフィン", "ボクシング", "格闘技", "総合格闘技",
-        "空手", "柔道", "剣道", "フェンシング", "アーチェリー", "射撃", "乗馬"
-    ]
-    
-    private let chestKeywords: [String] = [
-        "胸", "チェスト", "大胸筋",
-        "ベンチプレス", "インクラインベンチプレス", "インクライン・プッシュアップ", "フロア・プレス",
-        "プッシュアップ", "腕立て", "腕立て伏せ", "膝つき腕立て伏せ", "クラップ・プッシュアップ",
-        "ダンベルフライ", "ケーブル・フライ", "ケーブル・チェストプレス", "チェストプレス", "マシン・チェストプレス", "ケーブル・クロスオーバー",
-        "ディップス"
-    ]
-    
-    private let shoulderKeywords: [String] = [
-        "肩", "ショルダー", "三角筋",
-        "ショルダープレス", "ショルダー・プレス", "オーバーヘッドプレス", "ミリタリー・プレス", "アーノルド・プレス", "Zプレス",
-        "サイドレイズ", "フロントレイズ", "リアレイズ", "アップライトロウ", "フェイスプル",
-        "ランドマイン・プレス", "パイク・プッシュアップ", "プッシュ・プレス"
-    ]
-    
-    private let backKeywords: [String] = [
-        "背中", "背筋", "バック", "広背筋", "僧帽筋",
-        "懸垂", "プルアップ", "プルアップ / 懸垂", "アシステッド・プルアップ", "チンアップ", "チンアップ / 逆手懸垂",
-        "ラットプルダウン", "ベントオーバーロウ", "ローイング", "シーテッドロウ", "ローマシン",
-        "デッドリフト", "グッドモーニング",
-        "クリーン"
-    ]
-    
-    private let armKeywords: [String] = [
-        "腕", "アーム", "上腕", "前腕", "二頭筋", "三頭筋", "バイセップ", "トライセップ",
-        "アームカール", "ハンマーカール", "ケーブル・カール", "コンセントレーション・カール", "ゾットマン・カール", "バーベルカール", "EZバーカール",
-        "トライセップス", "ケーブルプレスダウン", "プレスダウン", "フレンチプレス", "スカルクラッシャー", "トライセプスエクステンション",
-        "リストカール", "グリッパー", "プレート・ピンチ"
-    ]
-    
-    private let legKeywords: [String] = [
-        "脚", "足", "レッグ", "太もも", "ふくらはぎ", "大腿四頭筋", "ハムストリング", "臀部", "ヒップ", "お尻",
-        "スクワット", "バックスクワット", "フロントスクワット", "ブルガリアンスクワット", "カーツィー・ランジ", "ランジ",
-        "レッグプレス", "レッグ・プレス", "レッグエクステンション", "レッグ・エクステンション", "レッグカール", "レッグ・カール",
-        "ライイング・レッグ・カール", "ノルディック・ハムストリング・エキセントリック",
-        "カーフレイズ",
-        "ケーブル・グルート・キックバック", "クラムシェル", "ヒップ・アブダクション・マシン", "ヒップ・アダクション・マシン"
-    ]
-    
-    private let absKeywords: [String] = [
-        "腹筋", "腹", "アブ", "腹直筋", "腹斜筋",
-        "クランチ", "シットアップ", "レッグレイズ", "バイシクルクランチ",
-        "ケーブル・クランチ", "マシン・クランチ",
-        "マウンテン・クライマー", "コペンハーゲン・プランク"
-    ]
-    
-    private let glutesKeywords: [String] = [
-        "お尻", "臀部", "ヒップ", "グルート", "大臀筋",
-        "ヒップスラスト", "ヒップリフト", "ブリッジ",
-        "ドンキーキック", "ケーブル・グルート・キックバック", "クラムシェル",
-        "ヒップ・アブダクション・マシン", "ヒップ・アダクション・マシン"
-    ]
-    
-    private let cardioKeywords: [String] = [
-        "ランニング", "ジョギング", "ウォーキング", "サイクリング", "自転車", "走る", "歩く", "有酸素",
-        "水泳", "クロール", "背泳ぎ", "平泳ぎ", "バタフライ", "縄跳び", "ダンス", "エアロビクス",
-        "クロスカントリー", "トライアスロン", "ハイキング", "登山"
-    ]
-    
-    private let coreKeywords: [String] = [
-        "プランク", "サイドプランク", "コア", "体幹", "腰"
-    ]
     
     // フィルタリングされたワークアウトリスト
     var workouts: [WorkoutItem] {
@@ -160,7 +90,7 @@ struct WorkoutRecordView: View {
             let totalSecondsForTenReps = 3.0 * 10.0
             let calories = (met * weight / 3600.0) * totalSecondsForTenReps
 
-            let bodyPart = determineBodyPart(for: [name], mets: met)
+            let bodyPart = BodyPartKeywords.determineBodyPart(for: [name], mets: met)
 
             return WorkoutItem(
                 name: name,
@@ -229,7 +159,10 @@ struct WorkoutRecordView: View {
                 .presentationCornerRadius(22)
         }
         .sheet(isPresented: $isPresentingCustom) {
-            CustomWorkoutCreateView()
+            CustomWorkoutCreateView(onSaveComplete: {
+                // 保存完了後にカスタムカテゴリーに切り替え
+                selectedCategory = "カスタム"
+            })
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(22)
@@ -491,7 +424,7 @@ struct WorkoutRecordView: View {
         for entry in metEntries {
             guard let displayName = entry.keys.first else { continue }
             
-            let bodyPart = determineBodyPart(for: entry.keys, mets: entry.mets)
+            let bodyPart = BodyPartKeywords.determineBodyPart(for: entry.keys, mets: entry.mets)
             
             let calories: Double
             let displayUnit: String
@@ -528,82 +461,7 @@ struct WorkoutRecordView: View {
             workoutItems = items.sorted { $0.name < $1.name }
         }
     }
-    
-    // 運動名から体の部位を判定
-    private func determineBodyPart(for keys: [String], mets: Double) -> String {
-        let allText = keys.joined(separator: " ").lowercased()
-        
-        // キーワードマッチで判定(優先順位順)
-        for keyword in chestKeywords {
-            if allText.contains(keyword) {
-                return "胸"
-            }
-        }
-        
-        for keyword in shoulderKeywords {
-            if allText.contains(keyword) {
-                return "肩"
-            }
-        }
-        
-        for keyword in backKeywords {
-            if allText.contains(keyword) {
-                return "背中"
-            }
-        }
-        
-        for keyword in armKeywords {
-            if allText.contains(keyword) {
-                return "腕"
-            }
-        }
-        
-        for keyword in legKeywords {
-            if allText.contains(keyword) {
-                return "脚"
-            }
-        }
-        
-        for keyword in absKeywords {
-            if allText.contains(keyword) {
-                return "腹筋"
-            }
-        }
-        
-        for keyword in glutesKeywords {
-            if allText.contains(keyword) {
-                return "お尻"
-            }
-        }
-        
-        for keyword in cardioKeywords {
-            if allText.contains(keyword) {
-                return "有酸素"
-            }
-        }
-        
-        for keyword in sportsKeywords {
-            if allText.contains(keyword) {
-                return "スポーツ"
-            }
-        }
-        
-        for keyword in coreKeywords {
-            if allText.contains(keyword) {
-                return "腹筋"
-            }
-        }
-        
-        // キーワードがなくても今のところは「有酸素」に寄せる
-        if mets >= 6.0 {
-            return "有酸素"
-        } else if mets >= 4.0 {
-            return "有酸素"
-        } else {
-            return "有酸素"
-        }
-    }
-    
+
     // ユーザーの体重(kg)を取得
     private func currentUserWeightKg() -> Double {
         let candidateKeys = [
@@ -658,64 +516,6 @@ struct WorkoutRecordView: View {
             bodyPart: custom.bodyPart
         )
     }
-}
-
-struct WorkoutRow: View {
-    /// 表示するワークアウト
-    let workout: WorkoutItem
-    /// 選択中の日付（親ビューから渡される）
-    let currentDate: Date
-    
-    private var calorieString: String {
-        if workout.calories < 1.0 {
-            return String(format: "%.1f", workout.calories)
-        } else {
-            return String(format: "%.0f", workout.calories.rounded())
-        }
-    }
-    
-    var body: some View {
-        HStack(spacing: 16) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(workout.name)
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                
-                Text("目安 \(calorieString)Kcal / \(workout.displayUnit)")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-            
-            Spacer()
-            
-            NavigationLink {
-                ExerciseSetEntryView(
-                    exerciseName: workout.name,
-                    selectedDate: currentDate
-                )
-            } label: {
-                Image(systemName: "plus")
-                    .font(.system(size: 16, weight: .semibold))
-                    .frame(width: 14, height: 24)
-                    .contentShape(Circle())
-            }
-            .buttonStyle(.glass)
-            .tint(Color(hex: "1F2340"))
-        }
-        .padding(.horizontal)
-        .padding(.vertical, 0)
-    }
-}
-
-struct WorkoutItem: Identifiable {
-    let id = UUID()
-    let name: String
-    let calories: Double
-    let displayUnit: String
-    let mets: Double
-    let tags: [String]
-    let bodyPart: String
 }
 
 struct WorkoutRecordView_Previews: PreviewProvider {
