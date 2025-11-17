@@ -662,7 +662,7 @@ struct OLAIPlanGenerationStepView: View {
                             Circle()
                                 .stroke(gradient, lineWidth: 2.5)
                                 .frame(width: 22, height: 22)
-                            
+
                             Circle()
                                 .fill(gradient)
                                 .frame(width: 8, height: 8)
@@ -676,7 +676,7 @@ struct OLAIPlanGenerationStepView: View {
                         .transition(.scale.combined(with: .opacity))
                     } else {
                         Circle()
-                            .stroke(Color.secondary.opacity(0.3), lineWidth: 2)
+                            .stroke(.secondary.opacity(0.3), lineWidth: 2)
                             .frame(width: 22, height: 22)
                     }
                 }
