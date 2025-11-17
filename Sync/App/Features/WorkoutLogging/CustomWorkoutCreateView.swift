@@ -8,6 +8,11 @@ struct CustomWorkoutCreateView: View {
     @State private var durationMin: Int = 30
     @State private var unit: String = "Kcal"
     @State private var calories: Int = 100
+    @State private var showingSaveError: Bool = false
+    @State private var saveErrorMessage: String = ""
+
+    /// 保存完了後に呼ばれるコールバック（オプショナル）
+    var onSaveComplete: (() -> Void)? = nil
 
     var body: some View {
         NavigationStack {
@@ -127,6 +132,11 @@ struct CustomWorkoutCreateView: View {
             }
         }
         .tint(Color(hex: "7C4DFF"))
+        .alert("保存エラー", isPresented: $showingSaveError) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text(saveErrorMessage)
+        }
     }
 
     private var canSave: Bool {
@@ -144,24 +154,40 @@ struct CustomWorkoutCreateView: View {
         // 時間とカロリー
         workout.durationMin = Double(durationMin)
         workout.caloriesKcal = calories
-        
+
         // タグと部位は、ひとまず名前と「カスタム」で初期化
-        workout.tags = [trimmedName]
+        workout.tags = [trimmedName, "カスタム"]
         workout.bodyPart = "カスタム"
-        
+
         // 並び替え用の作成日時
         workout.createdAt = Date()
 
+        // ModelContextに挿入
         modelContext.insert(workout)
 
+        // 保存を実行
         do {
             try modelContext.save()
-        } catch {
-            // TODO: エラー時のユーザー表示などを入れる場合はここに追加
-            assertionFailure("Failed to save CustomWorkoutEntity: \(error)")
-        }
 
-        dismiss()
+            // 保存成功のハプティックフィードバック
+            Haptics.notification(.success)
+
+            // 保存成功後に画面を閉じる
+            // Task.yieldで次のrunloopサイクルまで待機してから閉じる
+            // これによりSwiftDataの更新が確実に反映される
+            Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 100_000_000) // 0.1秒待機
+                // コールバックを実行（カテゴリー切り替えなど）
+                onSaveComplete?()
+                dismiss()
+            }
+        } catch {
+            // エラー時のハプティックフィードバック
+            Haptics.notification(.error)
+            // エラー時はアラートを表示
+            saveErrorMessage = "カスタムワークアウトの保存に失敗しました: \(error.localizedDescription)"
+            showingSaveError = true
+        }
     }
 }
 

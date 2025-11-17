@@ -159,7 +159,10 @@ struct WorkoutRecordView: View {
                 .presentationCornerRadius(22)
         }
         .sheet(isPresented: $isPresentingCustom) {
-            CustomWorkoutCreateView()
+            CustomWorkoutCreateView(onSaveComplete: {
+                // 保存完了後にカスタムカテゴリーに切り替え
+                selectedCategory = "カスタム"
+            })
                 .presentationDetents([.large])
                 .presentationDragIndicator(.visible)
                 .presentationCornerRadius(22)
